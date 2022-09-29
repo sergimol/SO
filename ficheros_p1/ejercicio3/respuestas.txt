@@ -1,0 +1,2 @@
+1. clone_string copia una cadena de caracteres en una nueva dirección de memoria. Solo se puede utilizar strcopy con login_name porque es el único array estático.
+2. Se cambian los ':' por '/000' para dividir la cadena.
