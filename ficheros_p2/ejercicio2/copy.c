@@ -31,5 +31,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	copy(fdo, fdd);
-	return 0;
+	if(close(fdo) != -1 && close(fdd) != -1)
+		return 0;
+	else{
+		perror("close failed");
+		return 1;
+	}
 }
