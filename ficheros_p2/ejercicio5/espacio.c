@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <string.h>
 
 /* Forward declaration */
 int get_size_dir(char *fname, size_t *blocks);
@@ -17,12 +18,12 @@ int get_size(char *fname, size_t *blocks)
 		return -1;
 	}
 	
-	if(S_ISDIR(st.st_mode)){
-		printf("directorio");
+	if((st.st_mode & S_IFMT) == S_IFDIR){
+		printf("directorio\n");
 		return get_size_dir(fname, blocks);
 	}
 
-	blocks += st.st_blocks;
+	*blocks += st.st_blocks;
 	return 0;
 }
 
@@ -41,11 +42,20 @@ int get_size_dir(char *dname, size_t *blocks)
 
 	struct dirent *dt;
 	while((dt = readdir(dir)) != NULL){
-		if(get_size(dt->d_name ,blocks) == -1){
+		if(strcmp(dt->d_name, ".") == 0 || strcmp(dt->d_name, "..") == 0){
+			printf("Punto\n");
+			continue;
+		}
+
+		if(get_size(dt->d_name, blocks) == -1){
 			perror("getsize failed");
 			return -1;
-		}	
+		}
+		// Está mal el tipo del bloque o algo porque escribe 15648858548897/4889+8 blocks
+		printf("%lu blocks\n", blocks);	
 	}
+
+	return 0;
 }
 
 /* Processes all the files in the command line calling get_size on them to
@@ -54,9 +64,10 @@ int get_size_dir(char *dname, size_t *blocks)
  */
 int main(int argc, char *argv[])
 {
-	size_t *blocks = 0;
-	int code = get_size(argv[1], blocks);
+	size_t blocks = 0;
+	int code = get_size(argv[1], &blocks);
 
-	size_t size = blocks * 512 / 2;
+	size_t size = (long unsigned int)blocks / 2;
+	printf("%luK %s\n", size, argv[1]);
 	return code;
 }
