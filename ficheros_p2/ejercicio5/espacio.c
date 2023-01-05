@@ -19,7 +19,7 @@ int get_size(char *fname, size_t *blocks)
 	}
 	
 	if((st.st_mode & S_IFMT) == S_IFDIR){
-		printf("directorio\n");
+		//printf("directorio\n");
 		return get_size_dir(fname, blocks);
 	}
 
@@ -43,16 +43,19 @@ int get_size_dir(char *dname, size_t *blocks)
 	struct dirent *dt;
 	while((dt = readdir(dir)) != NULL){
 		if(strcmp(dt->d_name, ".") == 0 || strcmp(dt->d_name, "..") == 0){
-			printf("Punto\n");
+			//printf("Punto\n");
 			continue;
 		}
 
+		//size_t blocksBefore = *blocks;
 		if(get_size(dt->d_name, blocks) == -1){
 			perror("getsize failed");
 			return -1;
 		}
+		//size_t fileSize = *blocks - blocksBefore;
+		//printf("%luK %s\n", fileSize, dt->d_name);	
 		// Está mal el tipo del bloque o algo porque escribe 15648858548897/4889+8 blocks
-		printf("%lu blocks\n", blocks);	
+		//printf("%lu blocks\n", *blocks);	
 	}
 
 	return 0;
@@ -64,10 +67,19 @@ int get_size_dir(char *dname, size_t *blocks)
  */
 int main(int argc, char *argv[])
 {
-	size_t blocks = 0;
-	int code = get_size(argv[1], &blocks);
+	size_t blocks;
 
-	size_t size = (long unsigned int)blocks / 2;
-	printf("%luK %s\n", size, argv[1]);
+	struct stat st;
+	int code = 0;
+	int i = 1;
+	while(lstat(argv[i], &st) != -1 && code != -1){
+		blocks = 0;
+		code = get_size(argv[i], &blocks);
+
+		size_t size = (long unsigned int)blocks / 2;
+		printf("%luK %s\n", size, argv[i]);
+		i++;
+	}
+	
 	return code;
 }
