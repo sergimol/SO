@@ -38,6 +38,7 @@
         "typeinfo": "c",
         "utility": "c",
         "variant": "c",
-        "thread": "c"
+        "thread": "c",
+        "stdio.h": "c"
     }
 }
